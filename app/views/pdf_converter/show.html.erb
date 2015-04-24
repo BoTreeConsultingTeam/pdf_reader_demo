@@ -1,9 +1,21 @@
-<%= simple_format(@document) %>
+<div class="row">
+	<%= link_to 'Back', root_path%>
+</div>
+<div class="page-header">
+	<h1>Text</h1>
+</div>
+<div class="row">
+	<%= simple_format(@document) %>
+</div>
 
-<%@other_images.each do |image|%>
-	<%= image_tag image_path(filename: image, ext: image.split('.').last) %>
-<% end %>
-
+<div class="page-header">
+	<h1>Images</h1>
+</div>
+<div class="row">
+	<%@other_images.each do |image|%>
+		<%= image_tag image_path(filename: image, ext: image.split('.').last) %>
+	<% end %>
+</div>
 <script type="text/javascript">
 	$(function () {
 	  var imageFiles = <%=raw @tiff_images	%>;
@@ -19,7 +31,7 @@
 	      var width = tiff.width();
 	      var height = tiff.height();
 	      if (canvas) {
-	        var $elem = $('<div><div><a href="' + filename + '">' +
+	        var $elem = $('<div class="container"><div class="row"><a href="' + filename + '">' +
 	                      filename +
 	                      ' (width: ' + width + ', height:' + height + ')' +
 	                      '</a></div></div>');
