@@ -13,7 +13,7 @@ class PdfConverterController < ApplicationController
       end
     end
     puts "All Images >>>>>>>>>>>>>> #{extractor.images}"
-    @images = extractor.images
+    @images = extractor.images.compact
     @images = @images.partition {|image| image.split('.').last == 'tif'}
     @tiff_images = @images.first
     @other_images = @images.last
