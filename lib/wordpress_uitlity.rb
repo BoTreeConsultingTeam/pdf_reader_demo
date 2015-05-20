@@ -3,30 +3,26 @@ require 'mime/types'
 
 module WordpressUtility
   class Post
-    FILENAME = 'cherry_PNG635.png'
 
-    def initialize
-      @wp = Rubypress::Client.new(host: "104.131.111.55",
-                                  username: "demo",
-                                  password: "demo",
-                                  path: "http://104.131.111.55/xmlrpc.php")
+    def initialize(params)
+      @wp = Rubypress::Client.new(host: params[:host],
+                                  username: params[:user],
+                                  password: params[:password],
+                                  path: params[:path])
     end
 
     def create_post(params)
-      @wp.newPost( blog_id: 1, # 0 unless using WP Multi-Site, then use the blog id
-                   content: {
+      @wp.newPost( content: {
                        post_status: 'draft',
                        post_date: Time.now,
                        post_content: params[:content].squish,
-                       post_title: 'PDF TO POST',
-                       post_author: 1, # 1 if there is only the admin user, otherwise the user's id
-
+                       post_title: 'PDF TO POST'
                    }
       )
     end
 
     def edit_post(params)
-      @wp.editPost( blog_id: 1, post_id: params[:id], author_id: 1, # 0 unless using WP Multi-Site, then use the blog id
+      @wp.editPost( post_id: params[:id],
                     content: {
                         post_content: "#{params[:content]} #{params[:images].join("\n")}" #"This is the body <img src='#{@image['url']}'></img>",
                     }
@@ -41,7 +37,7 @@ module WordpressUtility
     end
 
     def delete_post(params)
-      @wp.newPost( blog_id: params[:blog_id], post_id: params[:post_id])
+      @wp.newPost( post_id: params[:post_id])
     end
 
   end
