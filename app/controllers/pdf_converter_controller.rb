@@ -4,7 +4,7 @@ require 'rmagick'
 
 class PdfConverterController < ApplicationController
 
-  after_filter :edit_post, :post, :image_upload, :convert_images, :wordpress_utility,  only: :convert
+  after_filter :remove_image_and_file, :edit_post, :post, :image_upload, :convert_images, :wordpress_utility,  only: :convert
 
   def new
   end
@@ -12,6 +12,7 @@ class PdfConverterController < ApplicationController
   def convert
     @document = ""
     extractor = PDFUtility::ExtractImages::Extractor.new
+    @file = File.basename params[:file].path
     PDF::Reader.open(params[:file].path) do |reader|
       reader.pages.each do |page|
         @document += page.text
@@ -62,7 +63,7 @@ class PdfConverterController < ApplicationController
         @image = @wordpress_utility.upload_image("#{image}.png")
         @image_urls << @image['url']
       end
-      flash[:notice] = 'Successfuly Uploaded'
+      flash[:success] = 'Successfuly Uploaded'
     end
 
     def edit_post
@@ -72,4 +73,20 @@ class PdfConverterController < ApplicationController
                                    } )
     end
 
+    def remove_image_and_file
+      @images.flatten.each do |image|
+        delete_file(image)
+        delete_file("#{image}.png")
+      end
+      delete_file(@file)
+    end
+
+    def delete_file(file)
+      begin
+        File.delete(file)
+      rescue => e
+        print e
+        flash[:error] = "Error: File #{file} is not deleted"
+      end
+    end
 end
