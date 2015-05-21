@@ -1,8 +1,8 @@
 <div class="row">
-<%= form_tag convert_path, multipart:true do %>
+<%= form_tag publish_path, multipart:true do %>
     <div class="form-group">
         <label for="inputEmail">Select PDF File</label>
-        <%= file_field_tag "file" %>
+        <%= file_field_tag "pdf_file" %>
     </div>
     <%= submit_tag 'Process', data: { disable_with: 'Processing...' },class: "btn btn-primary" %>
 <% end %>
