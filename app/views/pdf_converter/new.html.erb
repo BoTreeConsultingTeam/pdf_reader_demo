@@ -1,3 +1,12 @@
+<% flash.each do |type, message| %>
+    <%- unless message.blank? %>
+        <div class="alert <%= bootstrap_class_for(type) %> fade in">
+          <button class="close" data-dismiss="alert"><i class="glyphicon glyphicon-remove-circle"></i></button>
+          <%= message.html_safe %>
+        </div>
+    <% end %>
+<% end %>
+
 <div class="row">
 <%= form_tag publish_path, multipart:true do %>
     <div class="form-group">

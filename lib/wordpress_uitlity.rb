@@ -55,14 +55,14 @@ module WordpressUtility
     end
 
     def draft_post_link(id)
-      "<a href='http://#{ENV['HOST']}/wp-admin/post.php?post=#{id}&action=edit' target='_blank'> Post </a>" if id.present?
+      "Click <a href='http://#{ENV['HOST']}/wp-admin/post.php?post=#{id}&action=edit' target='_blank'> here </a> to update the Post" if id.present?
     end
 
     private
       def upload_images(images)
-        images.flatten.each do |image|
+        images.each do |image|
           begin
-            upload_image("#{image}.png")
+            upload_image(image)
           rescue => e
             @errors << 'Unable to upload few images' unless @errors.include?('Unable to upload few images')
           end
