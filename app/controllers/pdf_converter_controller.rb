@@ -13,7 +13,6 @@ class PdfConverterController < ApplicationController
     @link = @wordpress_utility.publish(*extract_images_and_text)
     flash[:errors] = @wordpress_utility.errors.join('\n') unless @wordpress_utility.errors.nil?
     flash[:success] = 'PDF uploaded successfully.'
-    binding.pry
     render 'show'
   end
 
