@@ -12,8 +12,8 @@ class PdfConverterController < ApplicationController
   def publish
     @link = @wordpress_utility.publish(*extract_images_and_text)
     flash[:errors] = @wordpress_utility.errors.join('\n') unless @wordpress_utility.errors.nil?
-    flash[:success] = 'PDF uploaded successfully.'
-    render 'show'
+    flash[:success] = "PDF uploaded successfully.  #{@link}"
+    redirect_to root_path
   end
 
   private
@@ -35,7 +35,7 @@ class PdfConverterController < ApplicationController
       @images = images.partition { |image| image.split('.').last == 'tif' }
 
       convert_images(@images.first)
-      [content, images]
+      [content, @images.flatten]
     end
 
     def wordpress_utility
