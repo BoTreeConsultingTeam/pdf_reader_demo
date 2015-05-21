@@ -50,14 +50,13 @@ class PdfConverterController < ApplicationController
       tif_images.each_with_index do |image, index|
         png = Magick::ImageList.new(image)
         png.write "#{image}.png"
+        delete_file(image)
         tif_images[index] = "#{image}.png"
       end
     end
 
     def cleanup_temp_files
-      @images.flatten.each do |image|
-        delete_file(image)
-      end
+      @images.flatten.map { |image| delete_file(image) }
       delete_file(@pdf_file)
     end
 
