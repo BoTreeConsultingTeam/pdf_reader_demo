@@ -1,6 +1,7 @@
 require 'pdf/reader'
 require 'wordpress_uitlity'
 require 'rmagick'
+require 'zip'
 
 class PdfConverterController < ApplicationController
   before_filter :wordpress_utility, only: :publish
@@ -10,39 +11,56 @@ class PdfConverterController < ApplicationController
   end
 
   def publish
-    @link = @wordpress_utility.publish(*extract_images_and_text)
+    @link = @wordpress_utility.publish(*extract_blog_content)
     flash[:errors] = @wordpress_utility.errors.join('\n') unless @wordpress_utility.errors.nil?
     flash[:success] = "PDF uploaded successfully.  #{@link}"
     redirect_to root_path
   end
 
   private
+    def extract_blog_content
+      @content = ''
+      @images = []
+      params[:pdf_file].path.split('.').last == 'pdf' ? extract_images_and_text( params[:pdf_file].path ) : extract_zip
+      [ @content, @images.flatten ]
+    end
 
-    def extract_images_and_text
-      content = ''
-      @pdf_file = File.basename params[:pdf_file].path
+    def extract_zip
+      files = []
+      Zip::File.open(params[:pdf_file].path) do |zip_file|
+        zip_file.each do |pdf_file|
+          pdf_file.extract("#{pdf_file.name}")
+          files << pdf_file.name
+        end
+      end
+
+      files.sort_by { |file| file.split('-').last }.map { |pdf_file| extract_images_and_text(pdf_file) }
+
+      delete_file(File.basename(params[:pdf_file].path))
+    end
+
+    def extract_images_and_text(pdf_file)
       extractor = PDFUtility::ExtractImages::Extractor.new
-
-      PDF::Reader.open(params[:pdf_file].path) do |reader|
+      PDF::Reader.open( pdf_file ) do |reader|
         reader.pages.each do |page|
-          content += page.text
+          @content += page.text
           extractor.page(page)
         end
       end
 
       logger.debug "All Images >>>>>>>>>>>>>> #{extractor.images}"
       images = extractor.images.compact
-      @images = images.partition { |image| image.split('.').last == 'tif' }
-
-      convert_images(@images.first)
-      [content, @images.flatten]
+      images = images.partition { |image| image.split('.').last == 'tif' }
+      @images << images
+      convert_images(images.first)
+      delete_file(File.basename(pdf_file))
     end
 
     def wordpress_utility
       @wordpress_utility = WordpressUtility::Post.new({ host: ENV['HOST'],
-                                                         user:  ENV['USERNAME'],
-                                                         password: ENV['PASSWORD'],
-                                                         path:  ENV['WP_PATH'] })
+                                                        user:  ENV['USERNAME'],
+                                                        password: ENV['PASSWORD'],
+                                                        path:  ENV['WP_PATH'] })
     end
 
     def convert_images(tif_images)
@@ -55,7 +73,7 @@ class PdfConverterController < ApplicationController
     end
 
     def cleanup_temp_files
-      @images.flatten.map { |image| delete_file(image) }
+      @images.flatten.map { |image| delete_file(image); delete_file(image.split('.png').first) }
       delete_file(@pdf_file)
     end
 

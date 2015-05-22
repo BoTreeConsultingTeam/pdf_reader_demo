@@ -28,11 +28,11 @@ module PDFUtility
 
             case stream.hash[:Filter]
             when :CCITTFaxDecode then
-              @images << ExtractImages::Tiff.new(stream).save("#{page.number}-#{count}-#{name}.tif")
+              @images << ExtractImages::Tiff.new(stream).save("#{name}-#{SecureRandom.hex(5)}.tif")
             when :DCTDecode      then
-              @images << ExtractImages::Jpg.new(stream).save("#{page.number}-#{count}-#{name}.jpg")
+              @images << ExtractImages::Jpg.new(stream).save("#{name}-#{SecureRandom.hex(5)}.jpg")
             else
-              @images << ExtractImages::Raw.new(stream).save("#{page.number}-#{count}-#{name}.tif")
+              @images << ExtractImages::Raw.new(stream).save("#{name}-#{SecureRandom.hex(5)}.tif")
             end
           when :Form then
             count = process_page(PDF::Reader::FormXObject.new(page, stream), count)

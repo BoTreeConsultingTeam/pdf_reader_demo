@@ -8,11 +8,26 @@
 <% end %>
 
 <div class="row">
-<%= form_tag publish_path, multipart:true do %>
+<%= form_tag publish_path, multipart:true, onsubmit: "return checkName()" do %>
     <div class="form-group">
         <label for="inputEmail">Select PDF File</label>
-        <%= file_field_tag "pdf_file" %>
+        <%= file_field_tag "pdf_file", id: 'file' %>
     </div>
-    <%= submit_tag 'Process', data: { disable_with: 'Processing...' },class: "btn btn-primary" %>
+    <%= submit_tag 'Process', data: { disable_with: 'Processing...' }, class: "btn btn-primary" %>
 <% end %>
 </div>
+
+<script type="text/javascript">
+    var ar_ext = ['pdf', 'zip'];
+    function checkName() {
+        var name = document.getElementById('file').value;
+        var ext = name.substring(name.lastIndexOf('.') + 1);
+        if( ext == 'pdf' || ext == 'zip') {
+            return true
+
+        }else {
+            return false
+        }
+    };
+
+</script>
