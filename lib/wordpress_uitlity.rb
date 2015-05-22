@@ -71,7 +71,7 @@ module WordpressUtility
 
       def get_title_from_content(content)
         title = content.split(/\n/).reject{ |t| t == "" }.first
-        title.length > 30 ? title.squish.split(' ')[0, 6].join(' ') : title
+        title.length > 60 ? title.squish.split(' ')[0, 6].join(' ') : title
       end
   end
 end

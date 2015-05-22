@@ -4,38 +4,39 @@ require 'rmagick'
 require 'zip'
 
 class PdfConverterController < ApplicationController
-  before_filter :wordpress_utility, :specify_file, only: :publish
+  before_filter :wordpress_utility, only: :publish
   after_filter :cleanup_temp_files, only: :publish
 
   def new
   end
 
   def publish
-    @link = @wordpress_utility.publish(*[@content, @images.flatten])
+    @link = @wordpress_utility.publish(*extract_blog_content)
     flash[:errors] = @wordpress_utility.errors.join('\n') unless @wordpress_utility.errors.nil?
     flash[:success] = "PDF uploaded successfully.  #{@link}"
     redirect_to root_path
   end
 
   private
-    def specify_file
+    def extract_blog_content
       @content = ''
       @images = []
       params[:pdf_file].path.split('.').last == 'pdf' ? extract_images_and_text( params[:pdf_file].path ) : extract_zip
+      [ @content, @images.flatten ]
     end
 
     def extract_zip
-      @pdf_files = []
+      files = []
       Zip::File.open(params[:pdf_file].path) do |zip_file|
         zip_file.each do |pdf_file|
           pdf_file.extract("#{pdf_file.name}")
-          @pdf_files << pdf_file.name
+          files << pdf_file.name
         end
       end
 
-      @pdf_files.sort_by { |file| file.split('-').last }.map { |pdf_file| extract_images_and_text(pdf_file) }
+      files.sort_by { |file| file.split('-').last }.map { |pdf_file| extract_images_and_text(pdf_file) }
 
-      delete_file(File.basename params[:pdf_file].path)
+      delete_file(File.basename(params[:pdf_file].path))
     end
 
     def extract_images_and_text(pdf_file)
@@ -52,7 +53,7 @@ class PdfConverterController < ApplicationController
       images = images.partition { |image| image.split('.').last == 'tif' }
       @images << images
       convert_images(images.first)
-      delete_file(File.basename pdf_file)
+      delete_file(File.basename(pdf_file))
     end
 
     def wordpress_utility
